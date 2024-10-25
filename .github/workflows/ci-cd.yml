@@ -55,7 +55,7 @@ jobs:  # Define the jobs that run in the workflow
 
     - name: Deploy to AKS  # Step to deploy to Azure Kubernetes Service
       run: |
-        kubectl apply -f deployment.yaml --validate=false
-        kubectl apply -f service.yaml --validate=false
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
         
 
