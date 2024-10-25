@@ -1,0 +1,49 @@
+name: CI/CD Pipeline  # The name of your workflow
+
+on:  # This section specifies the events that trigger the workflow
+  push:  # This triggers the workflow on push events
+    branches:
+      - main  # Replace with your main branch name
+
+jobs:  # Define the jobs that run in the workflow
+  build:  # Job for building the application
+    runs-on: ubuntu-latest  # Specify the operating system for the job
+
+    steps:  # Steps to execute within the job
+    - name: Checkout code  # Step to checkout the code
+      uses: actions/checkout@v2  # Use the checkout action to pull the repo code
+
+    - name: Set up Docker Buildx  # Step to set up Docker Buildx
+      uses: docker/setup-buildx-action@v1  # Prepare Buildx for building multi-platform images
+
+    - name: Login to Docker Hub  # Step to log in to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}  # Reference to a secret in GitHub
+        password: ${{ secrets.DOCKER_PASSWORD }}  # Reference to a secret in GitHub
+
+    - name: Build and push Docker image  # Step to build and push the Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .  # Path to the Docker context (where the Dockerfile is)
+        push: true  # Set to true to push the image to Docker Hub
+        tags: nani2424/microservice:latest  # Tag the image
+
+  deploy:  # Job for deploying the application
+    runs-on: ubuntu-latest  # Specify the OS for the job
+    needs: build  # This job depends on the completion of the 'build' job
+
+    steps:
+    - name: Checkout code  # Step to checkout the code again
+      uses: actions/checkout@v2  # Use the checkout action
+
+    - name: Set up kubectl  # Step to set up kubectl
+      uses: azure/setup-kubectl@v1
+      with:
+        version: 'latest'  # Specify the version of kubectl to use
+
+    - name: Deploy to AKS  # Step to deploy to Azure Kubernetes Service
+      run: |
+        az aks get-credentials --resource-group Group --name myAKSCluster
+        kubectl apply -f deployment.yaml  # Apply the deployment configuration
+
