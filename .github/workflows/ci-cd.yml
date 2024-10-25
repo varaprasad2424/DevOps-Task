@@ -20,6 +20,9 @@ jobs:  # Define the jobs that run in the workflow
 
     - name: Get AKS credentials
       run: az aks get-credentials --resource-group Group --name myAKSCluster
+  
+    - name: Verify kubectl connectivity
+      run: kubectl get nodes
     
     - name: Set up Docker Buildx  # Step to set up Docker Buildx
       uses: docker/setup-buildx-action@v1  # Prepare Buildx for building multi-platform images
