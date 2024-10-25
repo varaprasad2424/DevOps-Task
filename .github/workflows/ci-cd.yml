@@ -12,7 +12,15 @@ jobs:  # Define the jobs that run in the workflow
     steps:  # Steps to execute within the job
     - name: Checkout code  # Step to checkout the code
       uses: actions/checkout@v2  # Use the checkout action to pull the repo code
+    
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: Get AKS credentials
+      run: az aks get-credentials --resource-group Group --name myAKSCluster
+    
     - name: Set up Docker Buildx  # Step to set up Docker Buildx
       uses: docker/setup-buildx-action@v1  # Prepare Buildx for building multi-platform images
 
@@ -44,6 +52,7 @@ jobs:  # Define the jobs that run in the workflow
 
     - name: Deploy to AKS  # Step to deploy to Azure Kubernetes Service
       run: |
-        az aks get-credentials --resource-group Group --name myAKSCluster
-        kubectl apply -f deployment.yaml  # Apply the deployment configuration
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+        
 
